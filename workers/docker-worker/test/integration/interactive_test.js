@@ -238,25 +238,34 @@ helper.secrets.mockSuite(suiteName(), ['docker', 'ci-creds'], function(mock, ski
     debug('posting to queue');
     worker.postToQueue(task, taskId);
 
+    debug('jw: getArtifact');
     let url = await getArtifact(worker.queue, taskId);
 
     //for testing, we don't care about https verification
+    debug('jw: new DockerExecClient');
     let client = new DockerExecClient({
       tty: false,
       command: ['cat'],
       url: url,
       wsopts: { rejectUnauthorized: false },
     });
+    debug('jw: await client.execute()');
     await client.execute();
 
     const TEST_BUF_SIZE = 1024 * 1024;
 
+    debug('jw: await pseudoRandomBytes');
     let buf = await pseudoRandomBytes(TEST_BUF_SIZE);
+    debug('jw: client.stdin.write(buf)');
     client.stdin.write(buf);
+    debug('jw: client.stdin.end()');
     client.stdin.end();
     let buffers = [];
+    debug('jw: client.stdout.on()');
     client.stdout.on('data', d => buffers.push(d));
+    debug('jw: await new Promise');
     await new Promise(accept => client.stdout.on('end', accept));
+    debug('jw: let data');
     let data = Buffer.concat(buffers);
     assert(data.compare(buf), 'buffer mismatch');
   });
