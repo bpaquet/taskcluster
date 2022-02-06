@@ -435,7 +435,7 @@ class Task extends EventEmitter {
       binds = _.union(binds, bindings[1]);
     }
 
-    binds = _.union('/var/run/docker.sock:/var/run/docker.sock')
+    binds = _.union(binds, '/var/run/docker.sock:/var/run/docker.sock')
 
     // If we have any binds, add them to HostConfig
     if (binds.length > 0) {
